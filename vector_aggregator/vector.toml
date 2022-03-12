@@ -1,0 +1,39 @@
+[api]
+  enabled = true
+
+[sources.vector_log]
+  type = "vector"
+  address = "0.0.0.0:6000"
+  shutdown_timeout_secs = 30
+  receive_buffer_bytes = 65_536
+  version = "1"
+
+[sources.vector_metrics]
+  type = "vector"
+  address = "0.0.0.0:6001"
+  shutdown_timeout_secs = 30
+  receive_buffer_bytes = 65_536
+  version = "1"
+
+# Expose metrics for scraping in the Prometheus format.
+[sinks.prometheus_sink]
+  address = "0.0.0.0:9091"
+  inputs = ["vector_metrics"]
+  type = "prometheus_exporter"
+
+[sinks.loki_sink]
+  # General
+  type = "loki" # required
+  inputs = ["vector_log"] # required
+  endpoint = "http://loki:3100" # required
+  encoding = "json"
+  request.concurrency = 10
+  request.rate_limit_duration_secs = 1
+  request.rate_limit_num = 10
+  healthcheck = false
+  # Labels
+  labels.host = "{{ host }}" 
+  labels.container = "{{ CONTAINER_NAME }}"
+  #labels.key = "value" # example
+  #labels.key = "{{ event_field }}" # example
+

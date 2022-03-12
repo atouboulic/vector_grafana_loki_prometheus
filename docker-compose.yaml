@@ -1,0 +1,53 @@
+version: "3"
+
+networks:
+  test:
+
+services:
+  loki:
+    image: grafana/loki:2.4.0
+    ports:
+      - "3100:3100"
+    command: -log.level=debug -config.file=/etc/loki/local-config.yaml
+    networks:
+      - test
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+     - ./prometheus/:/etc/prometheus/
+    ports:
+      - "9090:9090"
+    networks:
+     - test
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+     - ./grafana/conf/provisioning/:/etc/grafana/provisioning/
+    networks:
+      - test
+
+  vector_source:
+    image: timberio/vector:0.19.0-debian
+    volumes:
+     - ./vector_source/vector.toml:/etc/vector/vector.toml
+     - /etc/machine-id:/etc/machine-id:ro
+     - /run/log/journal:/run/log/journal
+     - /var/log/journal:/var/log/journal
+    network_mode: host
+
+  vector_aggregator:
+    image: timberio/vector:0.19.0-debian
+    ports:
+      - "6000:6000"
+      - "6001:6001"
+      - "9091:9091"
+    volumes:
+     - ./vector_aggregator/vector.toml:/etc/vector/vector.toml
+    networks:
+      - test
+
+      
