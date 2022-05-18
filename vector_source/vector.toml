@@ -21,7 +21,7 @@ include_databases = [ "^postgres$", "^oini$" ]
 
 [sinks.vector_aggregator]
   type = "vector"
-  inputs = [ "journald", "httpoini2agent" ]
+  inputs = [ "journald"]
   address = "127.0.0.1:6000"
   send_buffer_bytes = 65_536
   version = "1"
