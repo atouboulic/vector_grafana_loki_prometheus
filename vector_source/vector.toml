@@ -8,13 +8,20 @@
 [sources.host_metrics]
   type = "host_metrics"
 
-# Emit internal Vector metrics.
+# Capture internal Vector metrics.
 [sources.internal_metrics]
   type = "internal_metrics"
 
+[sources.postgres]
+type = "postgresql_metrics"
+endpoints = [ "postgresql://vector:vector@localhost:5432/oini" ]
+scrape_interval_secs = 15
+namespace = "postgresql"
+include_databases = [ "^postgres$", "^oini$" ]
+
 [sinks.vector_aggregator]
   type = "vector"
-  inputs = [ "journald" ]
+  inputs = [ "journald", "httpoini2agent" ]
   address = "127.0.0.1:6000"
   send_buffer_bytes = 65_536
   version = "1"
@@ -22,7 +29,7 @@
 # Expose metrics for scraping in the Prometheus format.
 [sinks.vector_metrics]
   type = "vector"
-  inputs = ["internal_metrics", "host_metrics"]
+  inputs = ["internal_metrics", "host_metrics", "postgres"]
   address = "127.0.0.1:6001"
   send_buffer_bytes = 65_536
   version = "1"
